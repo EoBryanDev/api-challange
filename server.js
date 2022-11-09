@@ -10,7 +10,7 @@ app.use(
 
 app.use(express.json());
 
-// rotas da api
+// rotas da API personalizada
 const rotaPessoa = require('./routes/cadastroPessoa');
 app.use('/pessoa', rotaPessoa);
 
@@ -20,4 +20,6 @@ app.get('/', (req, res) => {
 
 })
 
+
+// para subir o servidor utilizar o comando => npm start. Assim subiremos o nodemon também para testes
 app.listen(3000)
