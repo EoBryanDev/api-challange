@@ -43,4 +43,4 @@ app.get('/', (req, res) => {
 
 */
 // para subir o servidor utilizar o comando => npm start. Assim subiremos o nodemon também para testes
-app.listen(3000)
+app.listen(3001)
