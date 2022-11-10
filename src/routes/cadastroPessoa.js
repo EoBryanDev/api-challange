@@ -1,22 +1,21 @@
 var axios = require('axios');
-//posteriormente encontrar uma maneira de colocar como number o campo código, de maneira auto
-//import { randomUUID } from 'node:crypto';
 const router = require('express').Router();
+const Pessoa = require('../models/Pessoa');
 
-// ---   UTILIZAR ESSA ROTA PARA FAZER A PERMANENCIA NO MEU BANCO   --- //
 
-// 2.1 - Inicializei a variavel token para ser armazenada com o retorno da validação da APIexterna
+// 0.1 - Inicializei a variavel token para ser armazenada com o retorno da validação da APIexterna
 let token = '';
 
-// 3.1 - Inicializar a variavel que exibirá os dados de consulta retornados da APIexterna
+// 1.1 - Inicializar a variavel que exibirá os dados de consulta retornados da APIexterna
 let pessoas = [];
 
+// 3.1 - Inicializar a variavel que exibirá o dado de consulta retornados da APIexterna
 let pessoa = {};
 
-// 4.1 - Inicializar a variavel que mostrará a mensagem de resposta do cadastro
+// 2.1 - Inicializar a variavel que mostrará a mensagem de resposta do cadastro
 let respostaCadastro = '';
 
-// 1.0 - Método que faz a requisição na APIexterna para recuperar o token de autenticação
+// 0.1.1 - Método que faz a requisição na APIexterna para recuperar o token de autenticação
 handleGetToken = async () => {
 
     try {
@@ -41,7 +40,7 @@ handleGetToken = async () => {
 
 }
 
-// 3.0 - Trazer a lista de pessoas que estão retornadas da APIexterna
+// 1.1.1 - Trazer a lista de pessoas que estão retornadas da APIexterna
 showPeople = async () => {
     try {
         let response = await axios.get('http://168.138.231.9:10666/cadastro/', {
@@ -58,6 +57,7 @@ showPeople = async () => {
     }
 }
 
+// 3.1.1 - Trazer apenas uma pessoa com base no código identificador 
 showPerson = async (codigo) => {
     try {
         let response = await axios.get(`http://168.138.231.9:10666/cadastro/${codigo}`, {
@@ -77,7 +77,7 @@ showPerson = async (codigo) => {
     }
 }
 
-// 4.0 - Fazer registro de pessoa com base nos requisitos de estrutura da APIexterna
+// 2.1.1 - Fazer registro de pessoa com base nos requisitos de estrutura da APIexterna
 cadastrarAPIExterna = async () => {
 
     const pessoa = {
@@ -105,77 +105,78 @@ cadastrarAPIExterna = async () => {
     }
 }
 
-
-//  CREATE - criação de pessoa na APIexterna
-router.get('/cadastro', async (req, res) => {
-    //const { nome, data_nascimento} = req.body;
-    //handleGetToken()
-
-
-    //console.log(token)
-    
-
-    /*let pessoa = {
-        nome: 'teste_D2',
-        data_criacao: new Date,
-        data_nascimento: '29-01-1998',
-    }*/
-
-    /*const pessoa = {
-        nome: 'teste_D2',
-        email: '2dTeste@gmail.com',
-        data_criacao: '09-11-2022',
-        data_nascimento: '29-01-1998',
-
-    }
-    if (!pessoa.nome) {
-        res.status(422).json({ error: 'O nome é obrigatório!' });
-        return
-    }
-
+cadastrarDB = async (codigo) => {
     try {
-        const i = await axios.post('http://168.138.231.9:10666/cadastro', pessoa , {
+        let response = await axios.get(`http://168.138.231.9:10666/cadastro/${codigo}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
-            }
+            },
         })
-        console.log(i.data)
-        respostaCadastro = i.data
-        res.status(201).json(respostaCadastro);
+
+        let data = response.data;
+        let pessoaFiltrada = data.map((pessoa) => (
+            {
+                nome: pessoa.nome, 
+                nascimento: pessoa.data_nascimento
+            }
+        ))
+        await Pessoa.create(pessoaFiltrada)
+        console.log('cadastro realizado no banco')
+
+        
+
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.log(error.message);
     }
-    */
-    cadastrarAPIExterna()
-    res.status(201).json(respostaCadastro);
-
-
-    //res.status(201).json(respostaCadastro)
-
-});
-
-//  READ - inicio de autenticação para rota externa e recuperação de dados da APIexterna
+}
+// 0.0 - READ - inicio de autenticação para rota externa e recuperação de dados da APIexterna
 router.get('/', (req, res) => {
 
     handleGetToken();
-
-
-    //chamar já o método de buscar
 
     res.status(200).json(`${token}`);
 
 });
 
-// READ - verificar os registros da APIexterna
+// 1.0 - READ - verificar os registros da APIexterna
 router.get('/listarRegistros', (req, res) => {
 
     showPeople();
-    res.status(200).json(pessoas);
-})
 
+    res.status(200).json(pessoas);
+
+});
+
+// 2.0 CREATE - criação de pessoa na APIexterna
+router.get('/cadastro', async (req, res) => {
+    
+    cadastrarAPIExterna()
+
+    res.status(201).json(respostaCadastro);
+
+});
+
+// 3.0 READ - verificar apenas 1 registro da APIexterna
 router.get('/listarRegistro/:codigo', (req, res) => {
-    showPerson(req.params);
+
+    const { codigo } = req.params;
+
+    showPerson(codigo);
+
     res.status(200).json(pessoa);
+});
+
+// 4.0 CREATE - criar rota que pesquisa um id da APIexterna e realiza a criação de um novo array filtrado para ser inserido no banco de dados pessoal
+router.get('/cadastroPessoal/:codigo', (req, res) => {
+
+    const { codigo } = req.params;
+
+    cadastrarDB(codigo);
+    
+    console.log(pessoa);
+
+    res.status(201).json(pessoa);
+
 })
 
 
