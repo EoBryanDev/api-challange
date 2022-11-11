@@ -65,7 +65,6 @@ showPerson = async (codigo) => {
                 'Authorization': `Bearer ${token}`
             },
         })
-        console.log('aqui')
         console.log(response.data)
         let data = response.data;
         console.log(data)
@@ -134,12 +133,14 @@ router.get('/', (req, res) => {
 
     handleGetToken();
 
-    res.status(200).json(`${token}`);
+    res.redirect('/pessoa/listarRegistros')
+    //res.status(200).json(`${token}`);
 
 });
 
 // 1.0 - READ - verificar os registros da APIexterna
 router.get('/listarRegistros', (req, res) => {
+    console.log('aqui' + req.headers.authorization)
 
     showPeople();
 
@@ -179,5 +180,27 @@ router.get('/cadastroPessoal/:codigo', (req, res) => {
 
 })
 
+router.get('/cadastroDBteste/:codigo', (req, res) => {
+    const { codigo } = req.params;
+    handleGetToken()
+    cadastrarDB(codigo);
+
+    console.log(pessoa);
+
+    res.status(201).json(pessoa);
+})
+
+router.get('/seila', (req,res) => {
+
+    
+    const { name } = req.body;
+    
+
+    const person = {
+        name
+    }
+    //res.status(201).json(person);*/
+
+})
 
 module.exports = router;

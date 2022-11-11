@@ -1,13 +1,13 @@
 //config inicial
 require('dotenv').config();
+var cors = require('cors')
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
+app.use(cors())
 
 const DB_USER = process.env.DB_USER;
 const DB_PASS = encodeURIComponent(process.env.DB_PASS);
-console.log(DB_PASS + " " + DB_USER)
-
 
 app.use(
     express.urlencoded({
@@ -19,8 +19,10 @@ app.use(express.json());
 
 // rotas da API personalizada
 const rotaPessoa = require('./routes/cadastroPessoa');
+const rotaPessoaDb = require('./routes/cadastroExterno');
 
 app.use('/pessoa', rotaPessoa);
+app.use('/db', rotaPessoaDb);
 
 app.get('/', (req, res) => {
 
