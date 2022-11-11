@@ -18,27 +18,22 @@ app.use(
 app.use(express.json());
 
 // rotas da API personalizada
-const rotaPessoa = require('./routes/cadastroPessoa');
 const rotaPessoaDb = require('./routes/cadastroExterno');
 
-app.use('/pessoa', rotaPessoa);
 app.use('/db', rotaPessoaDb);
 
 app.get('/', (req, res) => {
 
-    res.json({ message: 'oi express' });
+    res.sendFile(__dirname + '/page/index.html');
 
 })
 
 mongoose
     .connect(`mongodb+srv://${DB_USER}:${DB_PASS}@api-challange.4ocpxz5.mongodb.net/?retryWrites=true&w=majority`)
     .then(() =>{
-        console.log('Conectamos ao MongoDB')
+        console.log(`Conectados ao MongoDB e Aplicação Rodando na Rota : http://localhost:3001/`)
         app.listen(3001);
     })
     .catch((err) => {
         console.log(err);
     })
-
-// para subir o servidor utilizar o comando => npm start. Assim subiremos o nodemon também para testes
-//app.listen(3001)
