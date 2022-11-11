@@ -32,7 +32,14 @@ router.post('/', async (req, res) => {
     }
 })
 
-router.get('/', async ())
+router.get('/', async (req, res) => {
+    try{
+        const pessoas = await Pessoa.find();
+        res.status(200).json(pessoas);
+    }catch(error) {
+        res.status(500).json({ error: error })
+    }
+})
 
 
 module.exports = router;
